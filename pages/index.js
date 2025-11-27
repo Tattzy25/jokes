@@ -66,21 +66,15 @@ export default function Home() {
     }
   };
 
-  const sendMessage = async () => {
-    if (!inputText.trim()) return;
-
-    const userMessage = inputText.trim();
-    addMessage(userMessage, 'user');
-    setInputText('');
+  const fetchJoke = async (category) => {
     setIsTyping(true);
-
     try {
       const response = await fetch('/api/joke', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ category: userMessage }),
+        body: JSON.stringify({ category }),
       });
 
       if (!response.ok) {
@@ -97,33 +91,19 @@ export default function Home() {
     }
   };
 
+  const sendMessage = async () => {
+    if (!inputText.trim()) return;
+
+    const userMessage = inputText.trim();
+    addMessage(userMessage, 'user');
+    setInputText('');
+    await fetchJoke(userMessage);
+  };
+
   const handleQuickPrompt = async (prompt) => {
     if (!prompt.trim()) return;
-    
     addMessage(prompt, 'user');
-    setIsTyping(true);
-
-    try {
-      const response = await fetch('/api/joke', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ category: prompt }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch joke');
-      }
-
-      const data = await response.json();
-      addMessage(data.joke, 'bot');
-      setApiCallCount(prev => prev + 1);
-    } catch (error) {
-      addMessage("Oops! Even my dirty mind couldn't come up with that one. Try again! 😅", 'bot');
-    } finally {
-      setIsTyping(false);
-    }
+    await fetchJoke(prompt);
   };
 
   const clearChat = () => {

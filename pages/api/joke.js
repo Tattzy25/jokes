@@ -119,14 +119,19 @@ export default async function handler(req, res) {
     ]
   };
 
+  // Pre-compute combined arrays for better performance
+  const allJokes = Object.values(jokes).flat();
+  const roastAndSavage = [...jokes.roast, ...jokes.savage];
+  const flirtyAndNaughty = [...jokes.flirty, ...jokes.naughty];
+
   // Determine which category to use
   let categoryJokes = jokes.default;
   if (category) {
     const lowerCategory = category.toLowerCase();
     if (lowerCategory.includes('roast') || lowerCategory.includes('burn') || lowerCategory.includes('savage')) {
-      categoryJokes = jokes.roast.concat(jokes.savage);
+      categoryJokes = roastAndSavage;
     } else if (lowerCategory.includes('flirt') || lowerCategory.includes('dirty')) {
-      categoryJokes = jokes.flirty.concat(jokes.naughty);
+      categoryJokes = flirtyAndNaughty;
     } else if (lowerCategory.includes('naughty') || lowerCategory.includes('nsfw')) {
       categoryJokes = jokes.naughty;
     } else if (lowerCategory.includes('kinky')) {
@@ -137,7 +142,7 @@ export default async function handler(req, res) {
       categoryJokes = jokes.oneliners;
     } else {
       // Mix everything for general requests
-      categoryJokes = Object.values(jokes).flat();
+      categoryJokes = allJokes;
     }
   }
 
